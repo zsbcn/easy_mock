@@ -1,0 +1,6 @@
+white_list:
+  - /login
+  - /
+support_method:
+  - get
+  - post

@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "easy-mock"
+version = "0.1.0"
+description = ""
+authors = ["zhangshibin <15139569980@163.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.105.0"
+uvicorn = "^0.24.0.post1"
+itsdangerous = "^2.1.2"
+sqlmodel = "^0.0.14"
+pyyaml = "^6.0.1"
+jinja2 = "^3.1.2"
+loguru = "^0.7.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
