@@ -7,6 +7,7 @@ from loguru import logger
 
 all_routers = APIRouter()
 
+# 自动加载core目录下的APIRouter
 model_list = pkgutil.iter_modules(__path__)
 for i in model_list:
     module = __import__(f'{Path(__file__).parent.name}.{i.name}', fromlist=[i.name])

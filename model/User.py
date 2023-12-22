@@ -1,6 +1,4 @@
-from sqlmodel import Field
-
-from conf import SQLModel
+from conf import SQLModel, Field
 
 
 class UserBase(SQLModel):

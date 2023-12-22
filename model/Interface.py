@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlmodel import SQLModel, Field
+from conf import SQLModel, Field
 
 
 class InterfaceBase(SQLModel):

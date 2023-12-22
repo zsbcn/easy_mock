@@ -1,6 +1,5 @@
-white_list:
+white_list: # 不需要校验session中用户信息的接口列表
   - /login
-  - /
-support_method:
+support_method: # 配置系统支持的请求方法
   - get
   - post
