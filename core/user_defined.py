@@ -7,7 +7,7 @@ from conf import get_session, Session, select
 from model.Interface import Interface
 from model.Rule import Rule
 
-router = APIRouter()
+router = APIRouter(tags=["自定义"], include_in_schema=False)
 
 
 @router.api_route("/{interface_path:path}", methods=["GET", "POST"])

@@ -84,7 +84,7 @@ class RuleService:
         return 0, "接口查询成功", result
 
 
-router = APIRouter(prefix="/rule")
+router = APIRouter(prefix="/rule", tags=["规则"])
 
 
 @router.post("/create", response_model=Response, response_model_exclude_none=True)

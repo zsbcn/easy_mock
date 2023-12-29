@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Request
-
+from loguru import logger
 from conf import get_session, Session, Response, select
 from model.Interface import Interface, InterfaceCreate, InterfaceDelete, InterfaceUpdate, InterfaceSelect
 
@@ -24,6 +24,7 @@ class InterfaceService:
         interface.method = interface.method.upper()
         # 完成新增操作
         db_interface = Interface.model_validate(interface)
+        logger.info(db_interface)
         self.session.add(db_interface)
         self.session.commit()
         return 0, "接口新增成功", None
@@ -79,6 +80,7 @@ async def create_interface(interface: InterfaceCreate, request: Request, session
 
 @router.post('/delete', response_model=Response, response_model_exclude_none=True)
 async def delete_interface(interface: InterfaceDelete, request: Request, session: Session = Depends(get_session)):
+    logger.info(interface)
     code, msg, result = InterfaceService(request, session).delete(interface)
     return Response(code=code, msg=msg, data=result)
 
