@@ -14,6 +14,6 @@ async def login(user: User, request: Request, session: Session = Depends(get_ses
         return Response(code=-1, msg="用户不存在")
     elif user_info.name == user.name:
         request.session["user_id"] = user_info.id
-        return Response()
+        return Response(code=0, msg="登录成功")
     else:
         return Response(code=-1, msg="登录失败")

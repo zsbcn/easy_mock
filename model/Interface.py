@@ -4,33 +4,30 @@ from conf import SQLModel, Field
 
 
 class InterfaceBase(SQLModel):
-    id: int = None
-    name: str = None
-    url: str = None
-    method: str = None
-    description: str = None
+    name: str = Field(min_length=1, max_length=100)
+    url: str = Field(min_length=1, max_length=100)
+    method: str = Field(min_length=1, max_length=100)
+    description: Optional[str] = None
 
 
-class Interface(SQLModel, table=True):
+class Interface(InterfaceBase, table=True):
     id: int = Field(default=None, primary_key=True)
-    name: str = Field(default=None, nullable=True)
-    url: str = Field(default=None, nullable=True)
-    method: str = Field(default=None, nullable=True)
-    description: str = Field(nullable=True)
-    user_id: str
+    user_id: str = None
 
 
 class InterfaceCreate(InterfaceBase):
     pass
 
 
-class InterfaceDelete(SQLModel):
-    pass
+class InterfaceDelete(InterfaceBase):
+    id: Optional[int] = None
+    user_id: Optional[str] = None
 
 
 class InterfaceUpdate(InterfaceBase):
-    pass
+    id: Optional[int] = None
+    user_id: Optional[str] = None
 
 
 class InterfaceSelect(SQLModel):
-    pass
+    id: Optional[int] = None

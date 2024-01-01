@@ -19,12 +19,13 @@ class InterfaceService:
         statement = select(Interface).where(Interface.url == interface.url)
         if self.session.exec(statement).fetchall():
             return -1, "接口新增失败, 已存在重复URL的接口, 建议的URL格式为'/user_id/xxx/xxx'", None
-        # 补充user_id、处理method的值为大写
-        interface.user_id = self.user_id
-        interface.method = interface.method.upper()
         # 完成新增操作
         db_interface = Interface.model_validate(interface)
+        # 补充user_id、处理method的值为大写
+        db_interface.user_id = self.user_id
+        db_interface.method = db_interface.method.upper()
         logger.info(db_interface)
+
         self.session.add(db_interface)
         self.session.commit()
         return 0, "接口新增成功", None
@@ -65,7 +66,10 @@ class InterfaceService:
             statement = statement.where(Interface.id == interface.id)
         # 有权限则返回查询结果
         if not (result := self.session.exec(statement).fetchall()):
-            return -1, "接口不存在或用户无权限", None
+            return 0, "用户无可用的接口", None
+        # 删除查询结果中的user_id
+        for item in result:
+            item.user_id = None
         return 0, "接口查询成功", result
 
 
