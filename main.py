@@ -52,7 +52,7 @@ async def check_user(request: Request, call_next):
         if not current_session:
             return Response(content=json.dumps({"code": -1, "msg": "请先登录"}), status_code=200,
                             media_type="application/json")
-        user_id = current_session.get("user_id")
+        user_id = current_session.get("userId")
         with Session(engine) as session:
             user = session.get(User, user_id)
         if not user:

@@ -6,7 +6,7 @@ from sqlmodel import SQLModel, Field, create_engine, Session, select
 
 from tools.parse_file import parse_yaml
 
-__all__ = ['engine', 'Session', 'SQLModel', "Field", "get_session", "Response", "select", "WHITE_LIST",
+__all__ = ['engine', 'Session', 'SQLModel', "Field", "get_session", "ResponseBody", "select", "WHITE_LIST",
            "SUPPORT_METHOD"]
 
 engine = create_engine('sqlite:///db.sqlite')  # 数据库
@@ -23,7 +23,7 @@ def get_session():
 
 
 @dataclass
-class Response:
+class ResponseBody:
     """
     管理接口响应类
     """

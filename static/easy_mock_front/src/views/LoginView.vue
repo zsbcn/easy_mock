@@ -26,8 +26,8 @@ interface UserForm {
 
 const formRef = ref<FormInstance>()
 const form = reactive<UserForm>({
-  id: '',
-  name: ''
+  id: 'zwx1199119',
+  name: 'zhangshibin'
 })
 
 const rules = reactive<FormRules<UserForm>>({

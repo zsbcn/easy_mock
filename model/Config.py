@@ -6,6 +6,7 @@ class Config(SQLModel, table=True):
     group: str
     key: str
     value: str
+    sort: int
 
 
 class ConfigResp(SQLModel):

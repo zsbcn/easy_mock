@@ -19,7 +19,7 @@ class InterfaceCreate(InterfaceBase):
     pass
 
 
-class InterfaceDelete(InterfaceBase):
+class InterfaceDelete(SQLModel):
     id: Optional[int] = None
     user_id: Optional[str] = None
 
@@ -31,3 +31,6 @@ class InterfaceUpdate(InterfaceBase):
 
 class InterfaceSelect(SQLModel):
     id: Optional[int] = None
+    name: str = None
+    url: str = None
+    method: str = None

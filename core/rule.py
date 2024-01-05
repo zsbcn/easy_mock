@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, Depends
 from fastapi.logger import logger
 
-from conf import get_session, Session, Response, select
+from conf import get_session, Session, ResponseBody, select
 from model.Interface import Interface
 from model.Rule import Rule, RuleCreate, RuleDelete, RuleUpdate, RuleSelect
 
@@ -14,7 +14,7 @@ class RuleService:
     def __init__(self, request: Request, session: Session):
         self.request = request
         self.session = session
-        self.user_id = request.session.get("user_id")
+        self.user_id = request.session.get("userId")
 
     @staticmethod
     def get_base_statement():
@@ -87,26 +87,26 @@ class RuleService:
 router = APIRouter(prefix="/rule", tags=["规则"])
 
 
-@router.post("/create", response_model=Response, response_model_exclude_none=True)
+@router.post("/create", response_model=ResponseBody, response_model_exclude_none=True)
 async def create_rule(rule: RuleCreate, request: Request, session: Session = Depends(get_session)):
     logger.info(rule)
     code, msg, result = RuleService(request, session).create(rule)
-    return Response(code=code, msg=msg, data=result)
+    return ResponseBody(code=code, msg=msg, data=result)
 
 
-@router.post("/delete", response_model=Response, response_model_exclude_none=True)
+@router.post("/delete", response_model=ResponseBody, response_model_exclude_none=True)
 async def delete_rule(rule: RuleDelete, request: Request, session: Session = Depends(get_session)):
     code, msg, result = RuleService(request, session).delete(rule)
-    return Response(code=code, msg=msg, data=result)
+    return ResponseBody(code=code, msg=msg, data=result)
 
 
-@router.post("/update", response_model=Response, response_model_exclude_none=True)
+@router.post("/update", response_model=ResponseBody, response_model_exclude_none=True)
 async def update_rule(rule: RuleUpdate, request: Request, session: Session = Depends(get_session)):
     code, msg, result = RuleService(request, session).update(rule)
-    return Response(code=code, msg=msg, data=result)
+    return ResponseBody(code=code, msg=msg, data=result)
 
 
-@router.post("/select", response_model=Response, response_model_exclude_none=True)
+@router.post("/select", response_model=ResponseBody, response_model_exclude_none=True)
 async def select_rule(rule: RuleSelect, request: Request, session: Session = Depends(get_session)):
     code, msg, result = RuleService(request, session).select(rule)
-    return Response(code=code, msg=msg, data=result)
+    return ResponseBody(code=code, msg=msg, data=result)

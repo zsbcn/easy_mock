@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ElMessage } from "element-plus";
+import {ElMessage} from "element-plus";
 
 const http = axios.create({
   baseURL: '/api',
@@ -26,9 +26,9 @@ http.interceptors.request.use(
 http.interceptors.response.use(
   response => {
     // 通过该函数来处理正常响应
-    if (response.status === 200) {
-      ElMessage({ type: response.data.code === 0 ? "success" : "error", message: response.data.msg })
-    }
+    // if (response.status === 200 && response.data.code !== 0) {
+    //   ElMessage.error(response.data['msg'])
+    // }
     return response.data;
   },
   error => {

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Request
 
-from conf import get_session, Session, Response, select
+from conf import get_session, Session, ResponseBody, select
 from model.User import User, UserCreate, UserDelete, UserUpdate, UserSelect
 
 
@@ -8,7 +8,7 @@ class UserService:
     def __init__(self, request: Request, session: Session):
         self.request = request
         self.session = session
-        self.user_id = request.session.get("user_id")
+        self.user_id = request.session.get("userId")
 
     def create(self, user: UserCreate):
         # 检查用户是否已经存在
@@ -40,35 +40,37 @@ class UserService:
         return 0, "更新成功", None
 
     def select(self, user: UserSelect):
+        if not user.id:
+            user.id = self.user_id
         statement = select(User).where(User.id == user.id)
         if user.name:
             statement = statement.where(User.name == user.name)
-        result = self.session.exec(statement).fetchall()
+        result = self.session.exec(statement).one()
         return 0, "查询成功", result
 
 
 router = APIRouter(prefix="/user", tags=["用户"])
 
 
-@router.post("/create", response_model=Response, response_model_exclude_none=True)
+@router.post("/create", response_model=ResponseBody, response_model_exclude_none=True)
 async def create_user(user: UserCreate, request: Request, session: Session = Depends(get_session)):
     code, msg, result = UserService(request, session).create(user)
-    return Response(code=code, msg=msg, data=result)
+    return ResponseBody(code=code, msg=msg, data=result)
 
 
-@router.post("/delete", response_model=Response, response_model_exclude_none=True)
+@router.post("/delete", response_model=ResponseBody, response_model_exclude_none=True)
 async def delete_user(user: UserDelete, request: Request, session: Session = Depends(get_session)):
     code, msg, result = UserService(request, session).delete(user)
-    return Response(code=code, msg=msg, data=result)
+    return ResponseBody(code=code, msg=msg, data=result)
 
 
-@router.post("/update", response_model=Response, response_model_exclude_none=True)
+@router.post("/update", response_model=ResponseBody, response_model_exclude_none=True)
 async def update_user(user: UserUpdate, request: Request, session: Session = Depends(get_session)):
     code, msg, result = UserService(request, session).update(user)
-    return Response(code=code, msg=msg, data=result)
+    return ResponseBody(code=code, msg=msg, data=result)
 
 
-@router.post("/select", response_model=Response, response_model_exclude_none=True)
+@router.post("/select", response_model=ResponseBody, response_model_exclude_none=True)
 async def select_user(user: UserSelect, request: Request, session: Session = Depends(get_session)):
     """
     用户信息查询接口
@@ -78,4 +80,4 @@ async def select_user(user: UserSelect, request: Request, session: Session = Dep
     :return:
     """
     code, msg, result = UserService(request, session).select(user)
-    return Response(code=code, msg=msg, data=result)
+    return ResponseBody(code=code, msg=msg, data=result)
