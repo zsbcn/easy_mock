@@ -4,9 +4,11 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
-from starlette.middleware.sessions import SessionMiddleware
+
+from starlette_session import SessionMiddleware
 
 from conf import SQLModel, engine, WHITE_LIST, Session
+from conf.constants import LoginConstants
 from core import all_routers
 from model.User import User
 
@@ -50,13 +52,15 @@ async def check_user(request: Request, call_next):
     if request.url.path not in WHITE_LIST:
         current_session = request.session
         if not current_session:
-            return Response(content=json.dumps({"code": -1, "msg": "请先登录"}), status_code=200,
+            code, msg = LoginConstants.USER_NOT_LOGIN
+            return Response(content=json.dumps({"code": code, "msg": msg}), status_code=200,
                             media_type="application/json")
         user_id = current_session.get("userId")
         with Session(engine) as session:
             user = session.get(User, user_id)
         if not user:
-            return Response(content=json.dumps({"code": -1, "msg": "请先在系统在注册后，再登录"}), status_code=200,
+            code, msg = LoginConstants.USER_NOT_EXIST
+            return Response(content=json.dumps({"code": code, "msg": msg}), status_code=200,
                             media_type="application/json")
     response = await call_next(request)
     return response
@@ -65,4 +69,4 @@ async def check_user(request: Request, call_next):
 # 加载所有路由
 app.include_router(all_routers)
 # 添加session的中间件
-app.add_middleware(SessionMiddleware, secret_key="xxxxxx", max_age=3600)
+app.add_middleware(SessionMiddleware, secret_key="xxxxxx", cookie_name="sessionId", max_age=3600)
