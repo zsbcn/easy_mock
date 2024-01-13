@@ -12,7 +12,6 @@ async def get_name(group: str, key: str = None, db_session: Session = Depends(ge
     if key:
         statement = statement.where(Config.key == key)
     result = db_session.exec(statement).fetchall()
-    db_session.exec(statement)
     response_data = []
     for i in result:
         response_data.append(ConfigResp(key=i.key, value=i.value))

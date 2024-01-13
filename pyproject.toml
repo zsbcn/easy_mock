@@ -6,13 +6,13 @@ authors = ["zhangshibin <15139569980@163.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
-uvicorn = "^0.24.0.post1"
-sqlmodel = "^0.0.14"
+python = "^3.9"
 pyyaml = "^6.0.1"
 loguru = "^0.7.2"
-fastapi = "^0.108.0"
+fastapi = "^0.109.0"
+sqlmodel = "^0.0.14"
 starlette-session = "^0.4.3"
+uvicorn = "^0.25.0"
 
 
 [tool.poetry.group.dev.dependencies]

@@ -7,7 +7,7 @@ class InterfaceBase(SQLModel):
     name: str = Field(min_length=1, max_length=100)
     url: str = Field(min_length=1, max_length=100)
     method: str = Field(min_length=1, max_length=100)
-    description: Optional[str] = None
+    description: Optional[str] = Field(nullable=True)
 
 
 class Interface(InterfaceBase, table=True):
@@ -20,17 +20,15 @@ class InterfaceCreate(InterfaceBase):
 
 
 class InterfaceDelete(SQLModel):
-    id: Optional[int] = None
-    user_id: Optional[str] = None
+    id: int
 
 
 class InterfaceUpdate(InterfaceBase):
-    id: Optional[int] = None
-    user_id: Optional[str] = None
+    id: int
 
 
 class InterfaceSelect(SQLModel):
-    id: Optional[int] = None
+    id: int = None
     name: str = None
     url: str = None
     method: str = None

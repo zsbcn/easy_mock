@@ -8,7 +8,10 @@ from tools.parse_file import parse_yaml
 
 __all__ = ['engine', 'Session', 'SQLModel', "Field", "get_session", "ResponseBody", "select", "WHITE_LIST"]
 
-engine = create_engine('sqlite:///db.sqlite')  # 数据库
+sqlite_file_name = "db.sqlite"
+sqlite_url = f"sqlite:///{sqlite_file_name}"
+connect_args = {"check_same_thread": False}
+engine = create_engine(sqlite_url, echo=False, connect_args=connect_args)
 
 # 读取配置文件
 CONFIG = parse_yaml(Path('conf/config.yml'))
