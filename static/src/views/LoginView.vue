@@ -46,7 +46,7 @@ const submitForm = function () {
   formRef.value.validate((valid) => {
     if (valid) {
       http.post('/login', form).then(res => {
-        if (res['code'] === 0)
+        if (res['code'] === '0')
           router.push('/');
       });
     }

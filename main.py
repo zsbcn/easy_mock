@@ -1,4 +1,5 @@
 import json
+import re
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, Response
@@ -35,15 +36,20 @@ async def check_user(request: Request, call_next):
     :param call_next:
     :return:
     """
+    system_path = False
+    need_session = True
     # 判断接口请求是否是系统内部接口
     for router in app.routes:
         if request.url.path == router.__getattribute__("path"):
             system_path = True
             break
-    else:
-        system_path = False
+    if system_path:
+        for r in WHITE_LIST:
+            if re.match(r, request.url.path):
+                need_session = False
+                break
     # 如果是系统的接口请求，不在白名单内的检查session
-    if system_path and request.url.path not in WHITE_LIST:
+    if system_path and need_session:
         current_session = request.session
         if not current_session:
             code, msg = LoginConstants.USER_NOT_LOGIN

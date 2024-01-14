@@ -35,18 +35,14 @@
       </el-input>
     </el-form-item>
     <el-form-item label="请求方式" prop="method">
-      <el-select v-model="interfaceInfo.method" :default-first-option="true">
+      <el-select v-model="interfaceInfo.method" style="width: 200px;">
         <el-option key="ALL" label="ALL" value=""></el-option>
         <el-option v-for="item in methods" :key="item.key" :label="item.value" :value="item.key"></el-option>
       </el-select>
     </el-form-item>
     <el-form-item>
       <el-button type="primary" @click="refreshInterfaceList">查询</el-button>
-    </el-form-item>
-    <el-form-item>
       <el-button @click="resetInterfaceInfo">重置</el-button>
-    </el-form-item>
-    <el-form-item>
       <el-button @click="dialogFormVisible = true">新建</el-button>
     </el-form-item>
   </el-form>
@@ -71,10 +67,10 @@
         <div v-else>{{ scope.row.url }}</div>
       </template>
     </el-table-column>
-    <el-table-column label="方法" prop="method" width="100px" align="center">
+    <el-table-column label="方法" prop="method" width="130px" align="center">
       <template #default="scope">
         <div v-if="scope.row.editable">
-          <el-select v-model="scope.row.method" placeholder="请选择请求方式">
+          <el-select v-model="scope.row.method">
             <el-option v-for="item in methods" :key="item.key" :label="item.value" :value="item.key"></el-option>
           </el-select>
         </div>
@@ -89,41 +85,49 @@
         <div v-else>{{ scope.row.description }}</div>
       </template>
     </el-table-column>
-    <el-table-column label="操作" width="230px" align="center">
+    <el-table-column label="操作" align="center">
       <template #default="scope">
-        <el-button @click="editInterface(scope.row)">
-          <div v-if="scope.row.editable">保存</div>
-          <div v-else>编辑</div>
+        <el-tooltip effect="light" placement="top" v-if="scope.row.status">
+          <template #content>{{ scope.row.editable ? "保存" : "编辑" }}</template>
+          <el-button @click="editInterface(scope.row)" v-if="scope.row.editable" :icon="Finished"></el-button>
+          <el-button @click="editInterface(scope.row)" v-else :icon="Edit"></el-button>
+        </el-tooltip>
+        <el-tooltip effect="light" placement="top" content="接口详情">
+          <el-button @click="$router.push('/detail/' + scope.row.id)" :icon="Document"></el-button>
+        </el-tooltip>
+        <el-button @click="change_status(scope.row.id,scope.row.status)">
+          <div v-if="scope.row.status">禁用</div>
+          <div v-else>启用</div>
         </el-button>
-        <el-button @click="$router.push('/detail/' + scope.row.id)">查看</el-button>
-        <el-button type="danger" @click="deleteInterface(scope.row.id)">删除</el-button>
+        <el-tooltip effect="light" placement="top" content="删除接口">
+          <el-button type="danger" @click="deleteInterface(scope.row.id)" :icon="Delete"/>
+        </el-tooltip>
       </template>
     </el-table-column>
   </el-table>
-  <el-config-provider :locale="zhCn">
-    <el-pagination
-        v-model:current-page="currentPage"
-        v-model:page-size="pageSize"
-        :page-sizes="[10, 20, 50, 100]"
-        :background="true"
-        layout="total, sizes, prev, pager, next, jumper, ->"
-        :total="total"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        style="padding: 8px"
-    />
-  </el-config-provider>
+  <el-pagination
+      v-model:current-page="currentPage"
+      v-model:page-size="pageSize"
+      :page-sizes="[10, 20, 50, 100]"
+      :background="true"
+      layout="total, sizes, prev, pager, next, jumper, ->"
+      :total="total"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      style="padding: 8px"
+  />
 </template>
 <script lang="ts" setup>
 
 import {onBeforeMount, ref, reactive} from 'vue';
-import http from '@/http';
-import {ElMessageBox, FormInstance} from 'element-plus';
+import http from '@/http/index';
+import {ElMessageBox} from 'element-plus';
 import {ElMessage} from 'element-plus';
-import zhCn from "element-plus/es/locale/lang/zh-cn";
+import type {FormInstance, FormRules} from 'element-plus'
+import {Delete, Edit, Finished, Document} from "@element-plus/icons-vue";
 
 const dialogFormVisible = ref(false);
-const tableHeight = ref(300);
+const tableHeight = ref(0);
 const currentPage = ref(1);
 const total = ref(0);
 const pageSize = ref(10);
@@ -138,23 +142,20 @@ const handleCurrentChange = (val: number) => {
 
 const methods = ref([]);
 
-const interfaceRules = reactive({
-  name: [
-    {required: true, message: '请输入名称', trigger: 'blur'},
-    {min: 1, max: 32, message: '长度在 1 到 32 个字符', trigger: 'blur'},
-  ],
-  url: [
-    {required: true, message: '请输入URL', trigger: 'blur'},
-    {min: 1, max: 64, message: '长度在 1 到 64 个字符', trigger: 'blur'},
-  ],
-  method: [
-    {required: true, message: '请选择请求方式', trigger: 'blur'},
-  ],
-});
-
 
 const newInterfaceRef = ref<FormInstance>();
 const interfaceRef = ref<FormInstance>();
+
+interface InterfaceForm {
+  id: number,
+  name: string,
+  url: string,
+  method: string,
+  description: string,
+  editable: boolean,
+  status: number
+}
+
 const newInterface = ref({
   name: "",
   url: "",
@@ -169,6 +170,21 @@ const interfaceInfo = ref({
   method: ""
 });
 
+const interfaceRules = reactive<FormRules<InterfaceForm>>({
+  name: [
+    {required: true, message: '请输入名称', trigger: 'blur'},
+    {min: 1, max: 32, message: '长度在 1 到 32 个字符', trigger: 'blur'},
+  ],
+  url: [
+    {required: true, message: '请输入URL', trigger: 'blur'},
+    {min: 1, max: 64, message: '长度在 1 到 64 个字符', trigger: 'blur'},
+  ],
+  method: [
+    {required: true, message: '请选择请求方式', trigger: 'blur'},
+  ],
+});
+
+
 function resetInterfaceInfo() {
   interfaceRef.value.clearValidate();
   interfaceRef.value.resetFields();
@@ -181,7 +197,7 @@ function createNewInterface() {
     if (valid) {
       http.post("/interface/create", newInterface.value).then((res) => {
         ElMessage({type: res["code"] === 0 ? "success" : "error", message: res["msg"]});
-        if (res["code"] === 0) {
+        if (res["code"] === "0") {
           dialogFormVisible.value = false;
           refreshInterfaceList();
         }
@@ -232,18 +248,37 @@ function deleteInterface(id) {
   })
 }
 
+function change_status(interface_id: number, status: number) {
+  if (status !== 0) {
+    status = 0;
+  } else {
+    status = 1;
+  }
+  http.post('/interface/change_status', {id: interface_id, status: status}).then((res) => {
+    if (res["code"] === "0") {
+      ElMessage({
+        type: 'success',
+        message: '接口状态修改成功',
+      })
+      refreshInterfaceList()
+    }
+  })
+}
+
 const interfaceList = ref([]);
 
 function refreshInterfaceList() {
   http.post('/interface/select', interfaceInfo.value).then((res) => {
-    interfaceList.value = res.data;
-    currentPage.value = 1;
-    total.value = interfaceList.value.length
+    if (res["code"] === "0") {
+      interfaceList.value = res.data;
+      currentPage.value = 1;
+      total.value = interfaceList.value.length;
+    }
   })
 }
 
 function getMethodList() {
-  http.get('/config/get?group=method&key=',
+  http.get('/config/methods',
   ).then((res) => {
     methods.value = res.data;
     newInterface.value.method = methods.value[0].key;
@@ -253,7 +288,7 @@ function getMethodList() {
 onBeforeMount(() => {
   getMethodList();
   refreshInterfaceList();
-  tableHeight.value = document.documentElement.clientHeight - 60 - 60 - 60
+  tableHeight.value = document.documentElement.clientHeight - 200
 })
 </script>
 

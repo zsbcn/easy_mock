@@ -2,10 +2,11 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, Request
 from loguru import logger
-from sqlalchemy.exc import NoResultFound
 
-from conf import get_session, Session, ResponseBody, select
-from model.Interface import Interface, InterfaceCreate, InterfaceDelete, InterfaceUpdate, InterfaceSelect
+from conf import get_session, Session, ResponseBody, select, SUPPORT_METHODS
+from model.Interface import Interface, InterfaceCreate, InterfaceDelete, InterfaceUpdate, InterfaceSelect, \
+    InterfaceStatus, InterfaceResponse
+from model.Rule import Rule
 
 
 class InterfaceConstants:
@@ -13,10 +14,13 @@ class InterfaceConstants:
     INTERFACE_UPDATE_SUCCESS = ("0", "接口更新成功")
     INTERFACE_DELETE_SUCCESS = ("0", "接口删除成功")
     INTERFACE_SELECT_SUCCESS = ("0", "接口查询成功")
+    INTERFACE_CHANGE_STATUS_SUCCESS = ("0", "接口状态修改成功")
 
     INTERFACE_URL_ERROR = ("-1", "接口URL格式错误, 建议的URL格式为'/user_id/xxx/xxx'")
-    INTERFACE_DUPLICATION_ERROR = ("-2", "接口检查失败, 已存在Name, URL, Method相同的接口")
-    INTERFACE_NOT_FOUND_ERROR = ("-3", "接口检查失败, 接口不存在或用户无权限")
+    INTERFACE_METHOD_ERROR = ("-2", f"接口Method格式错误, 建议的Method格式为{','.join(SUPPORT_METHODS)}")
+    INTERFACE_DUPLICATION_ERROR = ("-3", "接口检查失败, 已存在Name, URL, Method相同的接口")
+    INTERFACE_NOT_FOUND_ERROR = ("-4", "接口检查失败, 接口不存在或用户无权限")
+    INTERFACE_DELETE_HAVE_ERROR = ("-5", "接口删除失败, 接口可能不存在或用户无权限或者接口下仍关联有规则")
 
 
 class InterfaceService:
@@ -32,6 +36,8 @@ class InterfaceService:
     def create(self, interface: InterfaceCreate) -> (str, str, Any):
         if not interface.url.startswith("/"):
             return *InterfaceConstants.INTERFACE_URL_ERROR, None
+        if interface.method.upper() not in SUPPORT_METHODS:
+            return *InterfaceConstants.INTERFACE_METHOD_ERROR, None
         # 检查待新增接口的URL是否已经在系统中存在，接口的URL全局唯一，不可重复
         statement = select(Interface).where(Interface.user_id == self.user_id, Interface.name == interface.name,
                                             Interface.url == interface.url,
@@ -49,18 +55,27 @@ class InterfaceService:
         self.db_session.commit()
         return *InterfaceConstants.INTERFACE_CREATE_SUCCESS, None
 
-    def delete(self, interface: InterfaceDelete) -> (str, str, Any):
-        # 检查待删除的接口是否存在，是否属于当前登录的用户
-        statement = select(Interface).where(Interface.user_id == self.user_id, Interface.id == interface.id)
-        try:
-            result = self.db_session.exec(statement).one()
-        except NoResultFound:
-            return *InterfaceConstants.INTERFACE_NOT_FOUND_ERROR, None
-        else:
-            # 完成删除操作
-            self.db_session.delete(result)
-            self.db_session.commit()
-            return *InterfaceConstants.INTERFACE_DELETE_SUCCESS, None
+    def delete(self, interfaces: InterfaceDelete) -> (str, str, Any):
+        delete_result = []
+        for interface_id in interfaces.id:
+            # 检查待删除的接口是否存在，是否属于当前登录的用户
+            statement = select(Interface).where(Interface.user_id == self.user_id, Interface.id == interface_id)
+            interface_info = self.db_session.exec(statement).first()
+            statement = select(Rule).where(Rule.interface_id == interface_id)
+            rules = self.db_session.exec(statement).all()
+            logger.info(interface_info)
+            logger.info(rules)
+            if interface_info and rules:
+                delete_result.append({"id": interface_id, "error": "接口下存在关联规则，无法删除"})
+            elif interface_info:
+                # 完成删除操作
+                self.db_session.delete(interface_info)
+                self.db_session.commit()
+            else:
+                delete_result.append({"id": interface_id, "error": "接口不存在或用户无权限"})
+        if delete_result:
+            return *InterfaceConstants.INTERFACE_DELETE_HAVE_ERROR, delete_result
+        return *InterfaceConstants.INTERFACE_DELETE_SUCCESS, None
 
     def update(self, interface: InterfaceUpdate) -> (str, str, Any):
         # 检查待更新的接口是否存在，是否属于当前登录的用户
@@ -96,8 +111,7 @@ class InterfaceService:
             statement = statement.where(Interface.method == interface.method.upper())
         # 有权限则返回查询结果
         if not (result := self.db_session.exec(statement).fetchall()):
-            return *InterfaceConstants.INTERFACE_NOT_FOUND_ERROR, None
-
+            return *InterfaceConstants.INTERFACE_SELECT_SUCCESS, []
         logger.info(result)
         # 删除查询结果中的user_id
         filter_result = []
@@ -105,6 +119,27 @@ class InterfaceService:
             item.user_id = None
             filter_result.append(item)
         return *InterfaceConstants.INTERFACE_SELECT_SUCCESS, filter_result
+
+    def change_status(self, interface: InterfaceStatus) -> (str, str, Any):
+        # 检查待更新的接口是否存在，是否属于当前登录的用户
+        statement = select(Interface).where(Interface.user_id == self.user_id)
+        if not self.db_session.exec(statement.where(Interface.id == interface.id)).one():
+            return *InterfaceConstants.INTERFACE_NOT_FOUND_ERROR, None
+        result = self.db_session.get(Interface, interface.id)
+        result.status = bool(interface.status)
+        self.db_session.commit()
+        return *InterfaceConstants.INTERFACE_CHANGE_STATUS_SUCCESS, None
+
+    def select2(self, interface: InterfaceSelect) -> (str, str, Any):
+        statement = select(Interface).where(Interface.user_id == self.user_id, Interface.id == interface.id)
+        result = self.db_session.exec(statement).fetchall()
+        logger.info(result)
+        temp = []
+        for item in result:
+            temp.append(
+                InterfaceResponse(id=item.id, name=item.name, url=item.url, method=item.method,
+                                  description=item.description, status=item.status, rules=item.rules))
+        return *InterfaceConstants.INTERFACE_CHANGE_STATUS_SUCCESS, temp
 
 
 router = APIRouter(prefix="/interface", tags=["接口"])
@@ -135,4 +170,18 @@ async def update_interface(interface: InterfaceUpdate, request: Request, db_sess
 async def select_interface(interface: InterfaceSelect, request: Request, db_session: Session = Depends(get_session)):
     logger.info(interface)
     code, msg, result = InterfaceService(request, db_session).select(interface)
+    return ResponseBody(code=code, msg=msg, data=result)
+
+
+@router.post('/change_status', response_model=ResponseBody, response_model_exclude_none=True)
+async def change_status(interface: InterfaceStatus, request: Request, db_session: Session = Depends(get_session)):
+    logger.info(interface)
+    code, msg, result = InterfaceService(request, db_session).change_status(interface)
+    return ResponseBody(code=code, msg=msg, data=result)
+
+
+@router.post('/select2', response_model=ResponseBody, response_model_exclude_none=True)
+async def select_interface(interface: InterfaceSelect, request: Request, db_session: Session = Depends(get_session)):
+    logger.info(interface)
+    code, msg, result = InterfaceService(request, db_session).select2(interface)
     return ResponseBody(code=code, msg=msg, data=result)

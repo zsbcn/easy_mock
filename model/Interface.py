@@ -1,6 +1,7 @@
-from typing import Optional
-
+from typing import Optional, List
+from sqlmodel import Relationship
 from conf import SQLModel, Field
+from model.Rule import Rule
 
 
 class InterfaceBase(SQLModel):
@@ -12,7 +13,9 @@ class InterfaceBase(SQLModel):
 
 class Interface(InterfaceBase, table=True):
     id: int = Field(default=None, primary_key=True)
-    user_id: str = None
+    user_id: str = Field(default=None, foreign_key="user.id")
+    status: int = Field(default=True)
+    rules: Optional[List[Rule]] = Relationship(back_populates="interface")
 
 
 class InterfaceCreate(InterfaceBase):
@@ -20,7 +23,7 @@ class InterfaceCreate(InterfaceBase):
 
 
 class InterfaceDelete(SQLModel):
-    id: int
+    id: List[int]
 
 
 class InterfaceUpdate(InterfaceBase):
@@ -32,3 +35,18 @@ class InterfaceSelect(SQLModel):
     name: str = None
     url: str = None
     method: str = None
+
+
+class InterfaceStatus(SQLModel):
+    id: int
+    status: int
+
+
+class InterfaceResponse(SQLModel):
+    id: int
+    name: str
+    url: str
+    method: str
+    description: str
+    status: int
+    rules: Optional[List[Rule]]

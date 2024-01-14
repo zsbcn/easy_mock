@@ -18,17 +18,14 @@ http.interceptors.request.use(
   },
   error => {
     // 发送请求出错时，可以通过该函数来处理错误
-    Promise.reject(error);
+    Promise.reject(error).then(r => {
+    });
   }
 );
 
 // 响应拦截器
 http.interceptors.response.use(
   response => {
-    // 通过该函数来处理正常响应
-    // if (response.status === 200 && response.data.code !== 0) {
-    //   ElMessage.error(response.data['msg'])
-    // }
     return response.data;
   },
   error => {
@@ -38,7 +35,7 @@ http.interceptors.response.use(
       switch (error.response.status) {
         case 401:
           // 未登录，跳转到登录页面
-          store.dispatch("router/redirect", "/login");
+          ElMessage.error("请先登录");
           break;
         case 403:
           ElMessage.error("没有权限");
@@ -52,5 +49,4 @@ http.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-
 export default http;

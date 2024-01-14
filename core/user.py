@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Request
 
 from conf import get_session, Session, ResponseBody, select
 from model.User import User, UserCreate, UserDelete, UserUpdate, UserSelect
+from sqlalchemy.exc import NoResultFound
 
 
 class UserService:
@@ -39,14 +40,14 @@ class UserService:
         self.db_session.commit()
         return 0, "更新成功", None
 
-    def select(self, user: UserSelect):
-        if not user.id:
-            user.id = self.user_id
-        statement = select(User).where(User.id == user.id)
-        if user.name:
-            statement = statement.where(getattr(User, "name").like(f"%{user.name}%"))
-        result = self.db_session.exec(statement).one_or_none()
-        return 0, "查询成功", result
+    def select(self):
+        statement = select(User).where(User.id == self.user_id)
+        try:
+            result = self.db_session.exec(statement).one()
+        except NoResultFound:
+            return "-1", "用户不存在", None
+        else:
+            return "0", "查询成功", result
 
 
 router = APIRouter(prefix="/user", tags=["用户"])
@@ -71,7 +72,7 @@ async def update_user(user: UserUpdate, request: Request, db_session: Session = 
 
 
 @router.post("/select", response_model=ResponseBody, response_model_exclude_none=True)
-async def select_user(user: UserSelect, request: Request, db_session: Session = Depends(get_session)):
+async def select_user(request: Request, db_session: Session = Depends(get_session)):
     """
     用户信息查询接口
     :param user:
@@ -79,5 +80,5 @@ async def select_user(user: UserSelect, request: Request, db_session: Session = 
     :param db_session:
     :return:
     """
-    code, msg, result = UserService(request, db_session).select(user)
+    code, msg, result = UserService(request, db_session).select()
     return ResponseBody(code=code, msg=msg, data=result)
