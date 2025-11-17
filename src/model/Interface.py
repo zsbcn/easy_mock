@@ -1,7 +1,7 @@
 from typing import Optional, List
 from sqlmodel import Relationship
-from conf import SQLModel, Field
-from model.Rule import Rule
+from src.conf import SQLModel, Field
+from src.model.Rule import Rule
 
 
 class InterfaceBase(SQLModel):

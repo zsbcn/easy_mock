@@ -1,6 +1,6 @@
 from typing import Optional
 
-from conf import SQLModel, Field
+from src.conf import SQLModel, Field
 from sqlmodel import UniqueConstraint, Relationship
 
 

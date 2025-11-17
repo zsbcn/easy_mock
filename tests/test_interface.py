@@ -1,9 +1,9 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from core.interface import InterfaceConstants
-from core.login import LoginConstants
-from main import app
+from src.core.interface import InterfaceConstants
+from src.core.login import LoginConstants
+from src.main import app
 
 client = TestClient(app)
 

@@ -83,3 +83,8 @@ app.add_middleware(
 )
 # 添加session的中间件
 app.add_middleware(SessionMiddleware, secret_key="xxxxxx", cookie_name="sessionId", max_age=3600)
+
+if __name__ == '__main__':
+    from uvicorn import run
+
+    run(app, host="0.0.0.0", port=8000, log_level="error")

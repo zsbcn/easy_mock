@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Request
 
-from conf import get_session, Session, ResponseBody, select
-from model.User import User, UserCreate, UserDelete, UserUpdate, UserSelect
+from src.conf import get_session, Session, ResponseBody, select
+from src.model.User import User, UserCreate, UserDelete, UserUpdate
 from sqlalchemy.exc import NoResultFound
 
 

@@ -1,7 +1,7 @@
 from fastapi.testclient import TestClient
 
-from conf.constants import LoginConstants
-from main import app
+from src.conf import LoginConstants
+from src.main import app
 
 client = TestClient(app)
 

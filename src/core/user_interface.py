@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, Request, Response
 from loguru import logger
 from sqlalchemy.exc import NoResultFound
 
-from conf import get_session, Session, select
-from model.Interface import Interface
-from model.Rule import Rule
+from src.conf import get_session, Session, select
+from src.model.Interface import Interface
+from src.model.Rule import Rule
 
 router = APIRouter(tags=["自定义"], include_in_schema=False)
 

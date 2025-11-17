@@ -4,9 +4,9 @@ from typing import Any
 from fastapi import APIRouter, Request, Depends
 from loguru import logger
 
-from conf import get_session, Session, ResponseBody, select
-from model.Interface import Interface
-from model.Rule import Rule, RuleCreate, RuleDelete, RuleUpdate, RuleSelect
+from src.conf import get_session, Session, ResponseBody, select
+from src.model.Interface import Interface
+from src.model.Rule import Rule, RuleCreate, RuleDelete, RuleUpdate, RuleSelect
 
 
 class RuleConstants:

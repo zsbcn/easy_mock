@@ -3,10 +3,10 @@ from typing import Any
 from fastapi import APIRouter, Depends, Request
 from loguru import logger
 
-from conf import get_session, Session, ResponseBody, select, SUPPORT_METHODS
-from model.Interface import Interface, InterfaceCreate, InterfaceDelete, InterfaceUpdate, InterfaceSelect, \
+from src.conf import get_session, Session, ResponseBody, select, SUPPORT_METHODS
+from src.model.Interface import Interface, InterfaceCreate, InterfaceDelete, InterfaceUpdate, InterfaceSelect, \
     InterfaceStatus, InterfaceResponse
-from model.Rule import Rule
+from src.model.Rule import Rule
 
 
 class InterfaceConstants:

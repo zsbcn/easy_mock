@@ -4,7 +4,7 @@ from typing import Any
 
 from sqlmodel import SQLModel, Field, create_engine, Session, select
 
-from tools.parse_file import parse_yaml
+from src.tools.parse_file import parse_yaml
 
 __all__ = ['engine', 'Session', 'SQLModel', "Field", "get_session", "ResponseBody", "select", "CONFIG","WHITE_LIST",
            "SUPPORT_METHODS"]

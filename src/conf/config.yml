@@ -2,6 +2,7 @@ white_list: # 不需要校验session中用户信息的接口列表
   - /login
   - /config/[\S]*
   - /user/create
+  - /docs
 support_methods:
   - key: GET
     value: GET
