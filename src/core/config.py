@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from src.conf import ResponseBody, CONFIG
+from conf import ResponseBody, CONFIG
 
 router = APIRouter(prefix="/config", tags=["系统配置"])
 

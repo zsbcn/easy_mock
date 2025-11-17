@@ -1,4 +1,4 @@
-from src.conf import SQLModel, Field
+from conf import SQLModel, Field
 
 
 class UserBase(SQLModel):

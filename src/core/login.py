@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, Depends
 
-from src.conf import get_session, Session, ResponseBody
-from src.model.User import User
+from conf import get_session, Session, ResponseBody
+from model.User import User
 
 
 class LoginConstants:

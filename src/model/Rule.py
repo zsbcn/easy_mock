@@ -1,7 +1,8 @@
 from typing import Optional
 
-from src.conf import SQLModel, Field
 from sqlmodel import UniqueConstraint, Relationship
+
+from conf import SQLModel, Field
 
 
 class RuleBase(SQLModel):
