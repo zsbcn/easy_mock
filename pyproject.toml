@@ -5,8 +5,9 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "fastapi>=0.121.2",
+    "fastapi>=0.121.3",
     "loguru>=0.7.3",
+    "python-dotenv>=1.2.1",
     "pyyaml>=6.0.3",
     "sqlmodel>=0.0.27",
     "starlette-session>=0.4.3",
