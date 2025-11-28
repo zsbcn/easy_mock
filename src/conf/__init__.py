@@ -3,12 +3,13 @@ from pathlib import Path
 from typing import Any, Literal
 from uuid import uuid4
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict, PydanticBaseSettingsSource, YamlConfigSettingsSource
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, DeclarativeBase
 
-__all__ = ['engine', 'Session', "get_session", "ResponseBody", "settings", "DbBase", "get_uuid", "get_now_str"]
+__all__ = ['engine', 'Session', "get_session", "ResponseBody", "settings", "DbBase", "get_uuid", "get_now_str",
+           "RedisConfig"]
 
 
 class DbBase(DeclarativeBase):
@@ -52,8 +53,9 @@ class RedisConfig(BaseModel):
     """
     host: str = "127.0.0.1"
     port: int = 6379
-    password: str | None = ""
     db: int = 0
+    password: str | None = None
+    prefix: str | None = None
 
 
 class Settings(BaseSettings):
@@ -86,9 +88,7 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-print(settings)
-db_config = settings.db
-engine = create_engine(db_config.url, echo=db_config.echo, connect_args=db_config.connect_args)
+engine = create_engine(**settings.db.model_dump())
 
 
 def get_session():
@@ -100,6 +100,6 @@ class ResponseBody(BaseModel):
     """
     管理接口响应类
     """
-    code: str = "0"
-    message: str = "成功"
-    data: Any = None
+    code: str
+    message: str
+    data: Any | None = Field(default=None, exclude_if=lambda v: v is None)  # 值为None时不序列化

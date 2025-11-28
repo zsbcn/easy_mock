@@ -9,12 +9,13 @@ from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from loguru import logger
 from starlette.middleware.sessions import SessionMiddleware
+from uvicorn import run
 
-from conf import engine, Session, settings, DbBase
+from conf import engine, settings, DbBase
 from core.apis import all_routers
 from core.constants import LoginConstants
+from core.depends import get_redis_service
 from core.exception import BusinessException
-from core.models.model_user import User
 
 system_route_paths = []
 
@@ -53,14 +54,12 @@ async def check_user(request: Request, call_next):
         need_session = True
     # 如果是系统的接口请求，不在白名单内的检查session
     if need_session:
-        current_session = request.session
-        if not current_session:
-            return JSONResponse(content=LoginConstants.USER_NOT_LOGIN.as_dict())
-        username = current_session.get("username")
-        with Session(engine) as session:
-            user = session.query(User).filter(User.username == username).first()
-        if not user:
-            return JSONResponse(content=LoginConstants.USER_NOT_LOGIN.as_dict())
+        session_id = request.session.get("sessionId")
+        if not session_id:
+            return JSONResponse(content=LoginConstants.NOT_LOGIN.as_dict())
+        username = get_redis_service().get_str(f"session:{session_id}")
+        if not username:
+            return JSONResponse(content=LoginConstants.NOT_LOGIN.as_dict())
     response: Response = await call_next(request)
     return response
 
@@ -91,8 +90,4 @@ app.add_middleware(SessionMiddleware, secret_key=os.getenv("SECRET_KEY"), sessio
                    https_only=True)
 
 if __name__ == '__main__':
-    from uvicorn import run
-
-    serve = settings.server
-    run(app, host=serve.host, port=serve.port, log_level=serve.log_level, ssl_keyfile=serve.ssl_keyfile,
-        ssl_certfile=serve.ssl_certfile)
+    run(app, **settings.server.model_dump())

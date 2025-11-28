@@ -13,8 +13,9 @@ db:
 redis:
   host: 127.0.0.1
   port: 6379
-  password:
   db: 0
+  password: 1qaz!QAZ
+  prefix: "easy_mock:"
 white_list: # 不需要校验session中用户信息的接口列表
   - /register
   - /login
