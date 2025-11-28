@@ -1,10 +1,20 @@
+server:
+  host: 127.0.0.1
+  port: 8000
+  log_level: error
+  ssl_keyfile: conf/ssl/server.key
+  ssl_certfile: conf/ssl/server.crt
+db:
+  url: sqlite:///db.sqlite
+  echo: true
+  connect_args:
+    check_same_thread: false
+
+redis:
+  host: 127.0.0.1
+  port: 6379
+  password:
+  db: 0
 white_list: # 不需要校验session中用户信息的接口列表
+  - /register
   - /login
-  - /config/[\S]*
-  - /user/create
-  - /docs
-support_methods:
-  - key: GET
-    value: GET
-  - key: POST
-    value: POST

@@ -1,23 +1,94 @@
-from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
+from uuid import uuid4
 
-from sqlmodel import SQLModel, Field, create_engine, Session, select
+from pydantic import BaseModel
+from pydantic_settings import BaseSettings, SettingsConfigDict, PydanticBaseSettingsSource, YamlConfigSettingsSource
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, DeclarativeBase
 
-from tools.parse_file import parse_yaml
+__all__ = ['engine', 'Session', "get_session", "ResponseBody", "settings", "DbBase", "get_uuid", "get_now_str"]
 
-__all__ = ['engine', 'Session', 'SQLModel', "Field", "get_session", "ResponseBody", "select", "CONFIG","WHITE_LIST",
-           "SUPPORT_METHODS"]
 
-sqlite_file_name = "db.sqlite"
-sqlite_url = f"sqlite:///{sqlite_file_name}"
-connect_args = {"check_same_thread": False}
-engine = create_engine(sqlite_url, echo=False, connect_args=connect_args)
+class DbBase(DeclarativeBase):
+    """
+    数据库模型基类
+    """
+    pass
 
-# 读取配置文件
-CONFIG = parse_yaml(Path('conf/config.yml'))
-WHITE_LIST = CONFIG['white_list']
-SUPPORT_METHODS = [method["value"] for method in CONFIG['support_methods']]
+
+def get_uuid() -> str:
+    return uuid4().hex
+
+
+def get_now_str() -> str:
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+class Server(BaseModel):
+    """
+    服务器配置类
+    """
+    host: str
+    port: int
+    log_level: Literal["debug", "info", "warning", "error", "critical"]
+    ssl_keyfile: str
+    ssl_certfile: str
+
+
+class DbConfig(BaseModel):
+    """
+    数据库配置类
+    """
+    url: str
+    echo: bool = False
+    connect_args: dict | None = None
+
+
+class RedisConfig(BaseModel):
+    """
+    redis配置类
+    """
+    host: str = "127.0.0.1"
+    port: int = 6379
+    password: str | None = ""
+    db: int = 0
+
+
+class Settings(BaseSettings):
+    """
+    pydantic的配置类
+    """
+    server: Server
+    db: DbConfig
+    redis: RedisConfig
+    white_list: list
+
+    model_config = SettingsConfigDict(
+        extra="ignore"
+    )
+
+    @classmethod
+    def settings_customise_sources(
+            cls,
+            settings_cls: type[BaseSettings],
+            init_settings: PydanticBaseSettingsSource,
+            env_settings: PydanticBaseSettingsSource,
+            dotenv_settings: PydanticBaseSettingsSource,
+            file_secret_settings: PydanticBaseSettingsSource,
+    ):
+        return (
+            init_settings,
+            YamlConfigSettingsSource(settings_cls, yaml_file=Path(__file__).parent / "config.yml",
+                                     yaml_file_encoding="utf-8")
+        )
+
+
+settings = Settings()
+print(settings)
+db_config = settings.db
+engine = create_engine(db_config.url, echo=db_config.echo, connect_args=db_config.connect_args)
 
 
 def get_session():
@@ -25,11 +96,10 @@ def get_session():
         yield session
 
 
-@dataclass
-class ResponseBody:
+class ResponseBody(BaseModel):
     """
     管理接口响应类
     """
     code: str = "0"
-    msg: str = "成功"
+    message: str = "成功"
     data: Any = None
