@@ -17,7 +17,7 @@ class RegisterConstants(BaseEnum):
 
 class LoginConstants(BaseEnum):
     SUCCESS = ("0", "登录成功")
-    FAILED = ("2001", "用户登录失败")
+    FAILED = ("2000", "用户账号或密码错误")
     NOT_LOGIN = ("2002", "用户未登录")
 
 

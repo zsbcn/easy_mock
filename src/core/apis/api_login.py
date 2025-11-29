@@ -9,7 +9,7 @@ from core.models.model_user import UserLogin
 from core.services.service_login import LoginService
 from core.services.service_redis import RedisService
 
-router = APIRouter(tags=["用户"])
+router = APIRouter(tags=["登录"])
 
 
 @router.post("/login")

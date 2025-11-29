@@ -100,6 +100,6 @@ class ResponseBody(BaseModel):
     """
     管理接口响应类
     """
-    code: str
-    message: str
+    code: str = "0"
+    message: str = "成功"
     data: Any | None = Field(default=None, exclude_if=lambda v: v is None)  # 值为None时不序列化
