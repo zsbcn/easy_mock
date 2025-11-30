@@ -3,3 +3,4 @@
 /src/db.sqlite
 /src/.env
 /uv.lock
+**/__pycache__
