@@ -7,10 +7,10 @@ from core.utils import hash_password
 
 class RegisterService(BaseService):
     def register(self, user: UserCreate):
-        user_exist = self.db.query(User).where(User.username == user.username).first()
+        user_exist = self.db.query(User).where(User.user_id == user.user_id).first()
         if user_exist:
             raise BusinessException(RegisterConstants.USER_EXIST)
         hashed_password, salt = hash_password(user.password)
-        new_user = User(username=user.username, password=hashed_password, salt=salt)
+        new_user = User(password=hashed_password, salt=salt, **user.model_dump(exclude=("password",)))
         self.db.add(new_user)
         self.db.commit()

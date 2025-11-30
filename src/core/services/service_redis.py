@@ -33,7 +33,10 @@ class RedisService:
 
     @ping
     async def get_str(self, name: str) -> str | None:
-        return await self.__client.get(self.prefix + name)
+        result = await self.__client.get(self.prefix + name)
+        if result:
+            result = bytes.decode(result)
+        return result
 
     @ping
     async def set_add_with_expires(self, name: str, value: str, time: int = 3600):

@@ -57,8 +57,8 @@ async def check_user(request: Request, call_next):
         session_id = request.session.get("sessionId")
         if not session_id:
             return JSONResponse(content=LoginConstants.NOT_LOGIN.as_dict())
-        username = get_redis_service().get_str(f"session:{session_id}")
-        if not username:
+        user_id = await get_redis_service().get_str(f"session:{session_id}")
+        if not user_id:
             return JSONResponse(content=LoginConstants.NOT_LOGIN.as_dict())
     response: Response = await call_next(request)
     return response

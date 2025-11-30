@@ -19,7 +19,7 @@ async def login(user: UserLogin, request: Request, login_service: LoginService =
     login_service.login(user)
     session_id = token_hex(16)
     request.session["sessionId"] = session_id
-    await redis_service.set_add_with_expires(f"session:{session_id}", user.username, 3600)
+    await redis_service.set_add_with_expires(f"session:{session_id}", user.user_id, 3600)
     return ResponseBody(**LoginConstants.SUCCESS.as_dict())
 
 

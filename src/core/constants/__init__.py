@@ -17,9 +17,20 @@ class RegisterConstants(BaseEnum):
 
 class LoginConstants(BaseEnum):
     SUCCESS = ("0", "登录成功")
-    FAILED = ("2000", "用户账号或密码错误")
+    FAILED = ("2001", "用户账号或密码错误")
     NOT_LOGIN = ("2002", "用户未登录")
 
 
 class LogoutConstants(BaseEnum):
-    SUCCESS = ("0", "登出成功")
+    SUCCESS = ("0", "退出登录成功")
+    FAILED = ("3001", "退出登录失败")
+
+
+class UserConstants(BaseEnum):
+    SUCCESS = ("0", "成功")
+    NO_EXIST = ("2001", "用户不存在")
+
+
+class ProjectConstants(BaseEnum):
+    SUCCESS = ("0", "项目创建成功")
+    PROJECT_EXIST = ("3001", "项目已存在")
