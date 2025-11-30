@@ -27,3 +27,9 @@ class ProjectService(BaseService):
             logger.warning("用户项目关系数据已存在.")
         else:
             self.db.commit()
+
+    def check_project_by_user_id(self, user_id: str, project_id: str):
+        result = self.db.query(UserProject).where(UserProject.user_id == user_id,
+                                                  UserProject.project_id == project_id).first()
+        if not result:
+            raise BusinessException(ProjectConstants.PERMISSION_DENIED)

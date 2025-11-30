@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy import String, Integer
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -14,12 +14,12 @@ class Interface(DbBase):
     __tablename__ = "t_sys_interfaces"
     id: Mapped[str] = mapped_column(String(32), default=get_uuid, primary_key=True)
     name: Mapped[str] = mapped_column(String(32), nullable=False)
-    method: Mapped[str] = mapped_column(String(8), nullable=False)
-    url: Mapped[str] = mapped_column(String(128), nullable=False)
-    status: Mapped[int] = mapped_column(Integer, default=1)
+    method: Mapped[str] = mapped_column(String(8))
+    url: Mapped[str] = mapped_column(String(128))
+    status: Mapped[int] = mapped_column(Integer, default=1)  # 0: 无效; 1: 有效
     parent_id: Mapped[str] = mapped_column(String(32), nullable=False)
     project_id: Mapped[str] = mapped_column(String(32), nullable=False)
-    data_type: Mapped[int] = mapped_column(Integer, default=1)
+    data_type: Mapped[int] = mapped_column(Integer, default=1)  # 0: 接口; 1: 目录
     create_at: Mapped[str] = mapped_column(String(16), default=get_now_str)
     create_by: Mapped[str] = mapped_column(String(32), nullable=False)
     update_at: Mapped[str] = mapped_column(String(16), default=get_now_str)
@@ -34,8 +34,8 @@ class InterfaceCreate(BaseModel):
     data_type: Literal[0, 1]  # 0: 接口; 1: 目录
     parent_id: str = "-1"  # 默认是根目录
     name: str
-    method: str | None
-    url: str | None
+    method: str | None = None
+    url: str | None = None
 
 
 class InterfaceResponse(BaseModel):
@@ -52,3 +52,5 @@ class InterfaceResponse(BaseModel):
     data_type: int
     create_by: str
     update_by: str
+
+    model_config = ConfigDict(from_attributes=True)

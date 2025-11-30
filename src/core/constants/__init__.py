@@ -34,3 +34,10 @@ class UserConstants(BaseEnum):
 class ProjectConstants(BaseEnum):
     SUCCESS = ("0", "项目创建成功")
     PROJECT_EXIST = ("3001", "项目已存在")
+    PERMISSION_DENIED = ("3002", "用户无权限")
+
+
+class InterfaceConstants(BaseEnum):
+    SUCCESS = ("0", "接口创建成功")
+    INTERFACE_EXIST = ("4001", "接口/目录已存在")
+    PERMISSION_DENIED = ("4002", "用户无权限")

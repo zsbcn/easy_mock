@@ -15,7 +15,7 @@ class User(DbBase):
     username: Mapped[str] = mapped_column(String(32), nullable=False)
     password: Mapped[str] = mapped_column(String(64), nullable=False)
     salt: Mapped[str] = mapped_column(String(32), nullable=False)
-    status: Mapped[int] = mapped_column(Integer, default=1)
+    status: Mapped[int] = mapped_column(Integer, default=1)  # 0: 无效; 1: 有效
     create_at: Mapped[str] = mapped_column(String(16), default=get_now_str)
     update_at: Mapped[str] = mapped_column(String(16), default=get_now_str)
 

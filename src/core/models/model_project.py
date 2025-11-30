@@ -12,7 +12,7 @@ class Project(DbBase):
     __tablename__ = "t_sys_projects"
     id: Mapped[str] = mapped_column(String(32), default=get_uuid, primary_key=True)
     name: Mapped[str] = mapped_column(String(32), nullable=False)
-    status: Mapped[int] = mapped_column(Integer, default=1)
+    status: Mapped[int] = mapped_column(Integer, default=1)  # 0: 无效; 1: 有效
     create_at: Mapped[str] = mapped_column(String(16), default=get_now_str)
     update_at: Mapped[str] = mapped_column(String(16), default=get_now_str)
     create_by: Mapped[str] = mapped_column(String(32), nullable=False)
